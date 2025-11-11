@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ATS Resume Analyzer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #0f172a;
+      color: #f1f5f9;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      color: #38bdf8;
+      text-align: center;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background-color: #1e293b;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    }
+    textarea, input[type="file"] {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      background: #334155;
+      color: #f1f5f9;
+      border: none;
+      margin-top: 8px;
+      font-size: 15px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      background-color: #2563eb;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+    }
+    button:hover { background-color: #1e40af; }
+    .result {
+      margin-top: 20px;
+      background: #0f172a;
+      border-radius: 8px;
+      padding: 15px;
+    }
+    .loading { color: #facc15; }
+
+    @media (max-width: 768px) {
+      .container {
+        width: 90%;
+        padding: 15px;
+      }
+      textarea, button {
+        font-size: 14px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      textarea, button {
+        font-size: 13px;
+        padding: 10px;
+      }
+      h1 { font-size: 22px; }
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.14.305/pdf.min.js"></script>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.14.305/pdf.worker.min.js';
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1 id="welcomeMsg"></h1>
+    <label>Job Description</label>
+    <textarea id="jobDesc" rows="5" placeholder="Paste job description here..."></textarea><br><br>
+    <label>Upload Resume (.txt or .pdf)</label><br>
+    <input type="file" id="resumeFile" accept=".txt,.pdf"><br><br>
+    <label>Resume Text</label>
+    <textarea id="resume" rows="10" placeholder="Paste your resume here or upload a file..."></textarea>
+    <button id="analyzeBtn">Analyze Resume</button>
+    <div id="result" class="result"></div>
+  </div>
+
+  <script>
+    window.onload = () => {
+      const name = localStorage.getItem('currentUser');
+      document.getElementById('welcomeMsg').textContent = name ? `Welcome, ${name}!` : 'Welcome to ATS Analyzer';
+    };
+
+    async function extractTextFromPDF(file) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = async () => {
+          const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(reader.result) }).promise;
+          let text = '';
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const content = await page.getTextContent();
+            text += content.items.map(item => item.str).join(' ');
+          }
+          resolve(text);
+        };
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    async function getResumeText(file) {
+      if (!file) return '';
+      if (file.type === 'text/plain') return await file.text();
+      if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) return await extractTextFromPDF(file);
+      return '';
+    }
+
+    function analyzeResume(jobDesc, resume) {
+      const cleanText = (text) => text.toLowerCase().replace(/[^a-z0-9\\s]/g, ' ').split(/\\s+/).filter(Boolean);
+      const jdWords = cleanText(jobDesc);
+      const resWords = cleanText(resume);
+      const jdSet = new Set(jdWords);
+      const matched = [...jdSet].filter(w => resWords.includes(w));
+      const matchPercent = Math.round((matched.length / jdSet.size) * 100);
+      const score = Math.min(100, Math.round(matchPercent * 0.8 + (resume.length / 50)));
+
+      const suggestions = [];
+      if (matchPercent < 70) suggestions.push('Add more job-relevant keywords.');
+      if (resume.length < 800) suggestions.push('Add more detailed project and experience descriptions.');
+      if (!/skills|experience|education/i.test(resume)) suggestions.push('Include Skills, Experience, and Education sections.');
+      if (score > 90) suggestions.push('Your resume is highly optimized!');
+
+      return { score, matchPercent, suggestions };
+    }
+
+    document.getElementById('analyzeBtn').addEventListener('click', async () => {
+      const jobDesc = document.getElementById('jobDesc').value.trim();
+      const file = document.getElementById('resumeFile').files[0];
+      let resume = document.getElementById('resume').value.trim();
+      const resultDiv = document.getElementById('result');
+
+      if (file && !resume) {
+        resultDiv.innerHTML = '<p class=\"loading\">Extracting text...</p>';
+        resume = await getResumeText(file);
+        document.getElementById('resume').value = resume;
+      }
+
+      if (!jobDesc || !resume) {
+        alert('Please provide both job description and resume.');
+        return;
+      }
+
+      const result = analyzeResume(jobDesc, resume);
+      resultDiv.innerHTML = `
+        <h2>ATS Score: ${result.score}/100</h2>
+        <p>Keyword Match: ${result.matchPercent}%</p>
+        <h3>Suggestions:</h3>
+        <ul>${result.suggestions.map(s => `<li>${s}</li>`).join('')}</ul>
+      `;
+    });
+  </script>
+</body>
+</html>

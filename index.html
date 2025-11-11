@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register & Login | ATS Resume Analyzer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e3a8a);
+      color: #f8fafc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .form-container {
+      background-color: #1e293b;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+    }
+    h1 {
+      color: #38bdf8;
+      margin-bottom: 20px;
+    }
+    input[type="text"], input[type="password"], input[type="email"] {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 8px;
+      background: #334155;
+      color: #f8fafc;
+      font-size: 15px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 8px;
+      background-color: #2563eb;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover { background-color: #1e40af; }
+    .toggle-link {
+      margin-top: 10px;
+      display: block;
+      color: #38bdf8;
+      cursor: pointer;
+      font-size: 14px;
+    
+    }
+    .hidden { display: none; }
+    .message {
+      color: #facc15;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .form-container {
+        width: 85%;
+        padding: 20px;
+      }
+      input, button {
+        font-size: 14px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .form-container {
+        width: 90%;
+        padding: 15px;
+      }
+      h1 {
+        font-size: 20px;
+      }
+      input, button {
+        font-size: 13px;
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h1 id="formTitle">Login</h1>
+
+    <div id="loginForm">
+      <input type="email" id="loginEmail" placeholder="Email" required>
+      <input type="password" id="loginPassword" placeholder="Password" required>
+      <button onclick="loginUser()">Login</button>
+      <span class="toggle-link" onclick="toggleForm('register')">Don't have an account? &nbsp;Register</span>
+    </div>
+
+    <div id="registerForm" class="hidden">
+      <input type="text" id="regName" placeholder="Full Name" required>
+      <input type="email" id="regEmail" placeholder="Email" required>
+      <input type="password" id="regPassword" placeholder="Password" required>
+      <input type="password" id="regConfirm" placeholder="Confirm Password" required>
+      <button onclick="registerUser()">Register</button>
+      <span class="toggle-link" onclick="toggleForm('login')">Already have an account?&nbsp; Login</span>
+    </div>
+
+    <div class="message" id="message"></div>
+  </div>
+
+  <script>
+    function toggleForm(form) {
+      document.getElementById('loginForm').classList.toggle('hidden', form !== 'login');
+      document.getElementById('registerForm').classList.toggle('hidden', form !== 'register');
+      document.getElementById('formTitle').textContent = form === 'login' ? 'Login' : 'Register';
+      document.getElementById('message').textContent = '';
+    }
+
+    function registerUser() {
+      const name = document.getElementById('regName').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const password = document.getElementById('regPassword').value.trim();
+      const confirm = document.getElementById('regConfirm').value.trim();
+      const msg = document.getElementById('message');
+
+      if (!name || !email || !password || !confirm) {
+        msg.textContent = 'Please fill in all fields.';
+        return;
+      }
+      if (password !== confirm) {
+        msg.textContent = 'Passwords do not match!';
+        return;
+      }
+
+      localStorage.setItem('user_' + email, JSON.stringify({ name, email, password }));
+      msg.style.color = '#4ade80';
+      msg.textContent = 'Registration successful! You can now log in.';
+      toggleForm('login');
+    }
+
+    function loginUser() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value.trim();
+      const msg = document.getElementById('message');
+
+      if (!email || !password) {
+        msg.textContent = 'Please enter your email and password.';
+        return;
+      }
+
+      const storedUser = localStorage.getItem('user_' + email);
+      if (!storedUser) {
+        msg.textContent = 'No account found with this email.';
+        return;
+      }
+
+      const user = JSON.parse(storedUser);
+      if (user.password !== password) {
+        msg.textContent = 'Incorrect password!';
+        return;
+      }
+
+      msg.style.color = '#4ade80';
+      msg.textContent = `Welcome back, ${user.name}! Redirecting...`;
+      localStorage.setItem('currentUser', user.name);
+      setTimeout(() => { window.location.href = 'analyzer.html'; }, 1000);
+    }
+  </script>
+</body>
+</html>
