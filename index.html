@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Register & Login | ATS Resume Analyzer</title>
   <style>
+    /* ===== GLOBAL STYLES ===== */
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Arial, sans-serif;
       background: linear-gradient(135deg, #0f172a, #1e3a8a);
       color: #f8fafc;
       display: flex;
@@ -14,30 +15,47 @@
       align-items: center;
       height: 100vh;
       margin: 0;
+      padding: 10px;
     }
+
+    /* ===== FORM CONTAINER ===== */
     .form-container {
       background-color: #1e293b;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
-      width: 90%;
+      padding: 35px 30px;
+      border-radius: 16px;
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.45);
+      width: 100%;
       max-width: 400px;
       text-align: center;
+      transition: all 0.3s ease;
     }
+
     h1 {
       color: #38bdf8;
+      font-size: 1.8rem;
       margin-bottom: 20px;
     }
+
+    /* ===== INPUTS ===== */
     input[type="text"], input[type="password"], input[type="email"] {
       width: 100%;
       padding: 12px;
-      margin: 8px 0;
+      margin: 10px 0;
       border: none;
       border-radius: 8px;
       background: #334155;
       color: #f8fafc;
-      font-size: 15px;
+      font-size: 1rem;
+      box-sizing: border-box;
+      transition: background 0.3s;
     }
+
+    input:focus {
+      outline: 2px solid #38bdf8;
+      background: #475569;
+    }
+
+    /* ===== BUTTON ===== */
     button {
       width: 100%;
       padding: 12px;
@@ -46,48 +64,94 @@
       border-radius: 8px;
       background-color: #2563eb;
       color: white;
-      font-size: 16px;
+      font-size: 1rem;
       cursor: pointer;
-      transition: 0.3s;
+      transition: background 0.3s, transform 0.2s;
     }
-    button:hover { background-color: #1e40af; }
+
+    button:hover {
+      background-color: #1e40af;
+      transform: scale(1.02);
+    }
+
+    /* ===== LINKS ===== */
     .toggle-link {
-      margin-top: 10px;
+      margin-top: 15px;
       display: block;
       color: #38bdf8;
       cursor: pointer;
-      font-size: 14px;
-    
-    }
-    .hidden { display: none; }
-    .message {
-      color: #facc15;
-      font-size: 14px;
-      margin-top: 10px;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: color 0.3s;
     }
 
-    /* Responsive adjustments */
+    .toggle-link:hover {
+      color: #60a5fa;
+    }
+
+    .hidden { display: none; }
+
+    /* ===== MESSAGE ===== */
+    .message {
+      color: #facc15;
+      font-size: 0.9rem;
+      margin-top: 10px;
+      min-height: 20px;
+    }
+
+    /* ===== RESPONSIVE DESIGN ===== */
     @media (max-width: 768px) {
-      .form-container {
-        width: 85%;
+      body {
         padding: 20px;
       }
+
+      .form-container {
+        padding: 25px 20px;
+        max-width: 90%;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
       input, button {
-        font-size: 14px;
+        font-size: 0.95rem;
+        padding: 11px;
       }
     }
 
     @media (max-width: 480px) {
       .form-container {
-        width: 90%;
-        padding: 15px;
+        padding: 20px 15px;
+        border-radius: 12px;
       }
+
       h1 {
-        font-size: 20px;
+        font-size: 1.3rem;
+        margin-bottom: 15px;
+      }
+
+      input, button {
+        font-size: 0.9rem;
+        padding: 10px;
+      }
+
+      .toggle-link {
+        font-size: 0.85rem;
+      }
+
+      .message {
+        font-size: 0.85rem;
+      }
+    }
+
+    /* ===== EXTRA SMALL DEVICES ===== */
+    @media (max-width: 360px) {
+      h1 {
+        font-size: 1.2rem;
       }
       input, button {
-        font-size: 13px;
-        padding: 10px;
+        font-size: 0.85rem;
       }
     }
   </style>
@@ -96,20 +160,22 @@
   <div class="form-container">
     <h1 id="formTitle">Login</h1>
 
+    <!-- Login Form -->
     <div id="loginForm">
-      <input type="email" id="loginEmail" placeholder="Email" required>
-      <input type="password" id="loginPassword" placeholder="Password" required>
+      <input type="email" id="loginEmail" placeholder="Email" required />
+      <input type="password" id="loginPassword" placeholder="Password" required />
       <button onclick="loginUser()">Login</button>
-      <span class="toggle-link" onclick="toggleForm('register')">Don't have an account? &nbsp;Register</span>
+      <span class="toggle-link" onclick="toggleForm('register')">Don’t have an account? Register</span>
     </div>
 
+    <!-- Register Form -->
     <div id="registerForm" class="hidden">
-      <input type="text" id="regName" placeholder="Full Name" required>
-      <input type="email" id="regEmail" placeholder="Email" required>
-      <input type="password" id="regPassword" placeholder="Password" required>
-      <input type="password" id="regConfirm" placeholder="Confirm Password" required>
+      <input type="text" id="regName" placeholder="Full Name" required />
+      <input type="email" id="regEmail" placeholder="Email" required />
+      <input type="password" id="regPassword" placeholder="Password" required />
+      <input type="password" id="regConfirm" placeholder="Confirm Password" required />
       <button onclick="registerUser()">Register</button>
-      <span class="toggle-link" onclick="toggleForm('login')">Already have an account?&nbsp; Login</span>
+      <span class="toggle-link" onclick="toggleForm('login')">Already have an account? Login</span>
     </div>
 
     <div class="message" id="message"></div>
@@ -132,17 +198,19 @@
 
       if (!name || !email || !password || !confirm) {
         msg.textContent = 'Please fill in all fields.';
+        msg.style.color = '#facc15';
         return;
       }
       if (password !== confirm) {
         msg.textContent = 'Passwords do not match!';
+        msg.style.color = '#f87171';
         return;
       }
 
       localStorage.setItem('user_' + email, JSON.stringify({ name, email, password }));
       msg.style.color = '#4ade80';
       msg.textContent = 'Registration successful! You can now log in.';
-      toggleForm('login');
+      setTimeout(() => toggleForm('login'), 1000);
     }
 
     function loginUser() {
@@ -152,18 +220,21 @@
 
       if (!email || !password) {
         msg.textContent = 'Please enter your email and password.';
+        msg.style.color = '#facc15';
         return;
       }
 
       const storedUser = localStorage.getItem('user_' + email);
       if (!storedUser) {
         msg.textContent = 'No account found with this email.';
+        msg.style.color = '#f87171';
         return;
       }
 
       const user = JSON.parse(storedUser);
       if (user.password !== password) {
         msg.textContent = 'Incorrect password!';
+        msg.style.color = '#f87171';
         return;
       }
 
